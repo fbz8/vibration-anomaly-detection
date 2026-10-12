@@ -60,7 +60,9 @@ With a false alarm rate of about 2%, detection of 1-3% is indistinguishable from
 
 Sensor board designed in KiCad: Arduino Nano + MPU6050 (GY-521) over I2C (A4 = SDA, A5 = SCL, AD0 tied to GND). The schematic passes KiCad's ERC with 0 errors. The board has not been built yet, so all results above are still from simulated data.
 
-![Schematic](hardware/schematic.png)
+![Schematic](hardware/mpu6050_board/schematic.png).
+
+
 
 ## Next steps
 - Test zero-padded FFT and longer windows for frequency sensitivity
