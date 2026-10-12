@@ -55,6 +55,12 @@ With a false alarm rate of about 2%, detection of 1-3% is indistinguishable from
 - Hypothesis (not tested): 1-second windows give only 1 Hz FFT resolution, and `dominant_freq` has almost no variance in the training data. Zero-padding the FFT or using longer windows are untested next steps.
 - Results are on simulated data with one fault type. Real machine vibration is messier.
 - Detection is per window. A real system would likely require several consecutive anomalous windows before raising an alarm.
+- 
+## Hardware (planned)
+
+Sensor board designed in KiCad: Arduino Nano + MPU6050 (GY-521) over I2C (A4 = SDA, A5 = SCL, AD0 tied to GND). The schematic passes KiCad's ERC with 0 errors. The board has not been built yet, so all results above are still from simulated data.
+
+![Schematic](hardware/schematic.png)
 
 ## Next steps
 - Test zero-padded FFT and longer windows for frequency sensitivity
