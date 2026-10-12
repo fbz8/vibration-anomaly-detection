@@ -1,2 +1,9 @@
 *.csv
 sensors.db
+
+*-backups/
+*.lck
+_autosave-*
+#auto_saved_files#
+fp-info-cache
+*.kicad_prl
