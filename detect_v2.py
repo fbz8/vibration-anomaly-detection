@@ -3,12 +3,14 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import OneClassSVM
 from sklearn.pipeline import make_pipeline
+import sys, random
+SEED = int(sys.argv[1]) if len(sys.argv) > 1 else 0
+random.seed(SEED)
+np.random.seed(SEED)
 
 FS = 100     # Sampling rate in Hz (1 / DT)
 WIN = 100    # 1 second per window
 STEP = 50    # 50% overlap
-NFFT = 1024
-
 NFFT = 1024   # put this near FS, WIN and STEP at the top of the file
 
 def features(w):
@@ -39,6 +41,10 @@ def table_from(x):
         for s in range(0, len(x) - WIN + 1, STEP)
     ])
 
+def alarm_rule(flags, k=3, n=5):
+    flags = np.asarray(flags, dtype=int)
+    counts = np.convolve(flags, np.ones(n, dtype=int), mode="full")[:len(flags)]
+    return counts >= k
 
 # Load the original datasets
 normal = make_feature_table("normal.csv")
@@ -128,3 +134,23 @@ for freq in [5.1, 5.2, 5.5, 6, 7]:
         model.predict(table_from(signal(1.0, freq))) == -1
     )
     print(f"freq={freq}: detected {flagged:.0%}")
+
+# ---- 3-of-5 alarm rule ----
+print("--- alarm rule: alarm when 3 of the last 5 windows are flagged ---")
+
+
+def report(label, table):
+    flags = model.predict(table) == -1
+    alarm = alarm_rule(flags)
+    first = np.argmax(alarm) if alarm.any() else None
+    delay = f"{(first * STEP + WIN) / FS:.1f} s" if first is not None else "never"
+    print(f"{label}: per-window {flags.mean():.0%}, "
+          f"3-of-5 {alarm.mean():.0%}, first alarm {delay}")
+
+
+report("healthy (false alarms)", healthy[half:])
+report("amp=3, freq=12", table_from(signal(3, 12)))
+for freq in [5.1, 5.2, 5.5]:
+    report(f"freq={freq}", table_from(signal(1.0, freq)))
+for amp in [1.05, 1.1, 1.15, 1.2, 1.3]:
+    report(f"amp={amp}", table_from(signal(amp, 5)))    
