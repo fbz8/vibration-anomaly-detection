@@ -52,7 +52,6 @@ With a false alarm rate of about 2%, detection of 1-3% is indistinguishable from
 
 ## Limitations
 - The model reliably detects amplitude increases of roughly 20% or more, but **barely detects frequency shifts** below about 2 Hz.
-- Hypothesis (not tested): 1-second windows give only 1 Hz FFT resolution, and `dominant_freq` has almost no variance in the training data. Zero-padding the FFT or using longer windows are untested next steps.
 - Results are on simulated data with one fault type. Real machine vibration is messier.
 - Detection is per window. A real system would likely require several consecutive anomalous windows before raising an alarm.
 - 
@@ -62,10 +61,22 @@ Sensor board designed in KiCad: Arduino Nano + MPU6050 (GY-521) over I2C (A4 = S
 
 ![Schematic](hardware/mpu6050_board/schematic.png).
 
+## v2: Hann window + zero-padded FFT
 
+The README's earlier hypothesis was that 1 Hz FFT resolution limited frequency sensitivity. I tested it by applying a Hann window and zero-padding each window to 1024 points (`detect_v2.py`).
+
+| Frequency | v1 | v2 |
+|---|---|---|
+| 5.1 Hz | 2% | 25% |
+| 5.2 Hz | 1% | 97% |
+| 5.5 Hz | 2% | 100% |
+| 6 Hz | 3% | 100% |
+| 7 Hz | 32% | 100% |
+
+False alarms stayed at about 3% and amplitude detection was unchanged. Frequency shifts of 0.2 Hz are now caught on simulated data. Single run, one noise level, simulated data only.
 
 ## Next steps
-- Test zero-padded FFT and longer windows for frequency sensitivity
+- Test zero-padded FFT and longer windows for frequency sensitivity ✅
 - Add a "3 of the last 5 windows" alarm rule
 - Validate on a public bearing vibration dataset (e.g., CWRU)
 - Replace simulated data with real MPU6050 readings
