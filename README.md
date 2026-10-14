@@ -75,9 +75,26 @@ The README's earlier hypothesis was that 1 Hz FFT resolution limited frequency s
 
 False alarms stayed at about 3% and amplitude detection was unchanged. Frequency shifts of 0.2 Hz are now caught on simulated data. Single run, one noise level, simulated data only.
 
+## Alarm rule: 3 of the last 5 windows
+
+A single flagged window is not an alarm. An alarm is raised when at least 3 of the last 5 windows are flagged (windows are 1 s long with 0.5 s step, so the earliest possible alarm is at 2.0 s).
+
+| Case | Per-window | 3-of-5 | First alarm |
+|---|---|---|---|
+| Healthy (false alarms) | 3% | 0% | none |
+| Amplitude +30% | 100% | 100% | 2.0 s |
+| Amplitude +20% | 94% | 99% | 2.0 s |
+| Amplitude +15% | 70% | 78% | 2.5 s |
+| Amplitude +10% | 32% | 22% | 10.0 s |
+| Amplitude +5% | 5% | 1% | not detected |
+| Frequency 5.2 Hz | 98% | 100% | 2.0 s |
+| Frequency 5.1 Hz | 26% | 9% | 4.5 s |
+
+The rule removed all false alarms in the healthy test stream (about 250 s) and sped up confirmation of strong faults, but it makes weak faults (per-window rate below about 60%) harder to detect. Single run on simulated data.
+
 ## Next steps
 - Test zero-padded FFT and longer windows for frequency sensitivity ✅
-- Add a "3 of the last 5 windows" alarm rule
+- Add a "3 of the last 5 windows" alarm rule ✅
 - Validate on a public bearing vibration dataset (e.g., CWRU)
 - Replace simulated data with real MPU6050 readings
 - Design the sensor board schematic in KiCad
