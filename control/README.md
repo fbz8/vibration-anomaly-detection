@@ -11,7 +11,7 @@ Step-response exercises from the control part of my learning plan. All systems a
 ![P control](p_control_step.png)
 | `ex10_pi_control.m` | PI control, Kp = 4, Ki = 1, 4, 25 | The integrator removes the steady-state error (final value 1.000). Overshoot is 0.0 / 0.1 / 24.5%. The closed loop has a zero at -Ki/Kp, so the ex8 formula underestimates the overshoot (16.3% predicted for Ki = 25). At Ki = 4 the zero cancels a pole and the response is first order (settling 0.98 s). |
 ![PI control](pi_control_step.png)
-
+| `ex11_pid_disturbance.m` | P, PI and PID on a lightly damped second-order plant (wn = 2, zeta = 0.2) with a constant disturbance of 0.5 at t = 15 s | P leaves a steady-state error (0.667 before the disturbance, 0.833 after). The integral term returns the output to 1.000 after the disturbance. PI rings strongly (31% overshoot on the step). Adding the derivative term (acting on the measurement) damps it: no overshoot on the step, and it recovers fastest from the disturbance. |
 
 
 ## Next
