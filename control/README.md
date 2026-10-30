@@ -15,5 +15,5 @@ Step-response exercises from the control part of my learning plan. All systems a
 ![PID control](pid_disturbance.png)
 
 ## Next
-- Feedback control with P, PI and PID on a simple plant
+- Feedback control with P, PI and PID on a simple plant ✅
 - Sensor noise and filter delay inside a control loop
