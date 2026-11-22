@@ -38,7 +38,7 @@ The goal was not only to make it run, but to add the safety and fault-handling l
  3  RUN ──[TON T1, PT = 5 s]
  4  RUN ──┤/├ T1.Q ──────────────────────────────────────( LAMP )
  5  T1.Q ────────────────────────────────────────────────( MOTOR )
- 6  SENSOR ──[CTU C1, PV = 10]   RESET ← RESET_BTN ──┤/├ RUN
+ 6  SENSOR ── MOTOR ──[CTU C1, PV = 10]   RESET ← RESET_BTN ──┤/├ RUN
  7  MOTOR ──┤/├ SENSOR ──[TON T2, PT = 20 s]
  8  T2.Q ─┬─ ┤/├ ACK_BTN ────────────────────────────────( JAM )
     JAM ──┘
@@ -55,6 +55,7 @@ The goal was not only to make it run, but to add the safety and fault-handling l
 | **Stop-dominant latch** | STOP, crate-full and jam contacts in series after the seal-in branch | Any stop condition always wins, even while START is held |
 | **No unexpected restart** | START is used on its **rising edge** (R_TRIG), not its level | A held or stuck START button cannot restart the conveyor after a reset or alarm; the operator must press START again on purpose |
 | **Start warning** | TON 5 s before the motor runs; resets if STOP is pressed during the countdown | The full warning always plays before the belt moves |
+| **Count only while running** | `SENSOR` in series with `MOTOR` on the counter input | Found from OPC UA logs: a sensor pulse while stopped made the count 11 in a 10-box crate |
 | **RESET interlock** | `RESET_BTN` in series with `┤/├ RUN` | The counter cannot be reset while the belt runs, so a crate cannot be overfilled |
 | **Jam detection** | TON counts while the motor runs and no box is at the sensor; every box resets it | 20 s of sensor silence while running = jam |
 | **Latched alarm** | Seal-in on `JAM`, cleared only by `ACK_BTN` | Without the latch the motor would stop, the timer would reset and the motor would restart in a loop |
@@ -111,7 +112,11 @@ Tested with PV = 3 and jam time = 8 s to save time, then set to 10 boxes and 20 
 | `conveyor_station.project` | CODESYS V3.5 SP22 project |
 | `conveyor_station.xml` | PLCopen XML export of the program (readable text, works in other IEC 61131-3 tools) |
 
+## OPC UA
+
+The program also runs on a CODESYS SoftPLC with its OPC UA server enabled; a Python client reads and logs it over an encrypted connection. See [`../opcua`](../opcua/README.md).
+
 ## Next
 
-- OPC UA: read the PLC values from Python and connect them to the vibration anomaly detector in this repo
+- Connect the logged machine states to the vibration anomaly detector in this repo
 - Rebuild in Siemens TIA Portal (S7-1200)

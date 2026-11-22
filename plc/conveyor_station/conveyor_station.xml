@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <project xmlns="http://www.plcopen.org/xml/tc6_0200">
-  <fileHeader companyName="" productName="CODESYS" productVersion="CODESYS V3.5 SP22 Patch 4" creationDateTime="2026-11-22T03:58:05.8299486" />
-  <contentHeader name="conveyor_station.project" modificationDateTime="1601-01-01T03:00:00">
+  <fileHeader companyName="" productName="CODESYS" productVersion="CODESYS V3.5 SP22 Patch 4" creationDateTime="2026-11-23T00:04:54.4201515" />
+  <contentHeader name="conveyor_station.project" modificationDateTime="2026-11-23T00:02:17.3371292">
     <coordinateInfo>
       <fbd>
         <scaling x="1" y="1" />
@@ -425,7 +425,7 @@
             <vendorElement localId="29">
               <position x="0" y="0" />
               <alternativeText>
-                <xhtml xmlns="http://www.w3.org/1999/xhtml">Box counter: crate full at 10; RESET only allowed while stopped</xhtml>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml">Box counter: counts only while the motor runs; crate full at 10; RESET only while stopped</xhtml>
               </alternativeText>
               <addData>
                 <data name="http://www.3s-software.com/plcopenxml/fbdelementtype" handleUnknown="implementation">
@@ -444,20 +444,28 @@
             <contact localId="32" negated="false" storage="none" edge="none">
               <position x="0" y="0" />
               <connectionPointIn>
+                <connection refLocalId="31" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>MOTOR</variable>
+            </contact>
+            <contact localId="33" negated="false" storage="none" edge="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
                 <connection refLocalId="0" />
               </connectionPointIn>
               <connectionPointOut />
               <variable>RESET_BTN</variable>
             </contact>
-            <contact localId="33" negated="true" storage="none" edge="none">
+            <contact localId="34" negated="true" storage="none" edge="none">
               <position x="0" y="0" />
               <connectionPointIn>
-                <connection refLocalId="32" />
+                <connection refLocalId="33" />
               </connectionPointIn>
               <connectionPointOut />
               <variable>RUN</variable>
             </contact>
-            <inVariable localId="34">
+            <inVariable localId="35">
               <position x="0" y="0" />
               <connectionPointOut />
               <expression>10</expression>
@@ -467,17 +475,17 @@
               <inputVariables>
                 <variable formalParameter="CU">
                   <connectionPointIn>
-                    <connection refLocalId="31" />
+                    <connection refLocalId="32" />
                   </connectionPointIn>
                 </variable>
                 <variable formalParameter="RESET">
                   <connectionPointIn>
-                    <connection refLocalId="33" />
+                    <connection refLocalId="34" />
                   </connectionPointIn>
                 </variable>
                 <variable formalParameter="PV">
                   <connectionPointIn>
-                    <connection refLocalId="34" />
+                    <connection refLocalId="35" />
                   </connectionPointIn>
                 </variable>
               </inputVariables>
@@ -504,13 +512,13 @@
                 </data>
               </addData>
             </block>
-            <comment localId="35" height="0" width="0">
+            <comment localId="36" height="0" width="0">
               <position x="0" y="0" />
               <content>
                 <xhtml xmlns="http://www.w3.org/1999/xhtml" />
               </content>
             </comment>
-            <vendorElement localId="36">
+            <vendorElement localId="37">
               <position x="0" y="0" />
               <alternativeText>
                 <xhtml xmlns="http://www.w3.org/1999/xhtml">Jam timer: motor running and no box at the sensor for 20 s</xhtml>
@@ -521,7 +529,7 @@
                 </data>
               </addData>
             </vendorElement>
-            <contact localId="38" negated="false" storage="none" edge="none">
+            <contact localId="39" negated="false" storage="none" edge="none">
               <position x="0" y="0" />
               <connectionPointIn>
                 <connection refLocalId="0" />
@@ -529,30 +537,30 @@
               <connectionPointOut />
               <variable>MOTOR</variable>
             </contact>
-            <contact localId="39" negated="true" storage="none" edge="none">
+            <contact localId="40" negated="true" storage="none" edge="none">
               <position x="0" y="0" />
               <connectionPointIn>
-                <connection refLocalId="38" />
+                <connection refLocalId="39" />
               </connectionPointIn>
               <connectionPointOut />
               <variable>SENSOR</variable>
             </contact>
-            <inVariable localId="40">
+            <inVariable localId="41">
               <position x="0" y="0" />
               <connectionPointOut />
               <expression>T#20S</expression>
             </inVariable>
-            <block localId="37" typeName="TON" instanceName="T2">
+            <block localId="38" typeName="TON" instanceName="T2">
               <position x="0" y="0" />
               <inputVariables>
                 <variable formalParameter="IN">
                   <connectionPointIn>
-                    <connection refLocalId="39" />
+                    <connection refLocalId="40" />
                   </connectionPointIn>
                 </variable>
                 <variable formalParameter="PT">
                   <connectionPointIn>
-                    <connection refLocalId="40" />
+                    <connection refLocalId="41" />
                   </connectionPointIn>
                 </variable>
               </inputVariables>
@@ -579,13 +587,13 @@
                 </data>
               </addData>
             </block>
-            <comment localId="41" height="0" width="0">
+            <comment localId="42" height="0" width="0">
               <position x="0" y="0" />
               <content>
                 <xhtml xmlns="http://www.w3.org/1999/xhtml" />
               </content>
             </comment>
-            <vendorElement localId="42">
+            <vendorElement localId="43">
               <position x="0" y="0" />
               <alternativeText>
                 <xhtml xmlns="http://www.w3.org/1999/xhtml">Jam alarm latch: cleared only by ACK</xhtml>
@@ -596,7 +604,7 @@
                 </data>
               </addData>
             </vendorElement>
-            <contact localId="43" negated="false" storage="none" edge="none">
+            <contact localId="44" negated="false" storage="none" edge="none">
               <position x="0" y="0" />
               <connectionPointIn>
                 <connection refLocalId="0" />
@@ -604,7 +612,7 @@
               <connectionPointOut />
               <variable>T2.Q</variable>
             </contact>
-            <contact localId="44" negated="false" storage="none" edge="none">
+            <contact localId="45" negated="false" storage="none" edge="none">
               <position x="0" y="0" />
               <connectionPointIn>
                 <connection refLocalId="0" />
@@ -612,19 +620,19 @@
               <connectionPointOut />
               <variable>JAM</variable>
             </contact>
-            <contact localId="45" negated="true" storage="none" edge="none">
+            <contact localId="46" negated="true" storage="none" edge="none">
               <position x="0" y="0" />
               <connectionPointIn>
-                <connection refLocalId="43" />
                 <connection refLocalId="44" />
+                <connection refLocalId="45" />
               </connectionPointIn>
               <connectionPointOut />
               <variable>ACK_BTN</variable>
             </contact>
-            <coil localId="46" negated="false" storage="none">
+            <coil localId="47" negated="false" storage="none">
               <position x="0" y="0" />
               <connectionPointIn>
-                <connection refLocalId="45" />
+                <connection refLocalId="46" />
               </connectionPointIn>
               <connectionPointOut />
               <variable>JAM</variable>
