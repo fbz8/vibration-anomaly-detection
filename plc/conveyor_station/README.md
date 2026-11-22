@@ -59,6 +59,26 @@ The goal was not only to make it run, but to add the safety and fault-handling l
 | **Jam detection** | TON counts while the motor runs and no box is at the sensor; every box resets it | 20 s of sensor silence while running = jam |
 | **Latched alarm** | Seal-in on `JAM`, cleared only by `ACK_BTN` | Without the latch the motor would stop, the timer would reset and the motor would restart in a loop |
 
+## Operator screen (HMI)
+
+Built with CODESYS Visualization and tested online against the running program.
+
+![HMI](hmi.png)
+
+| Element | Type | PLC variable | Note |
+|---|---|---|---|
+| START | Button (tap) | `START_BTN` | TRUE while pressed |
+| STOP | Button (tap FALSE) | `STOP_BTN` | Writes FALSE while pressed, so it behaves like a real NC stop button |
+| RESET | Button (tap) | `RESET_BTN` | Only works while stopped (interlock in the PLC, not in the screen) |
+| ACK | Button (tap) | `ACK_BTN` | Clears the jam alarm |
+| SENSOR | Button (tap) | `SENSOR` | Simulates a box passing the photo sensor |
+| Warning | Lamp, yellow | `LAMP` | Start warning |
+| Motor running | Lamp, green | `MOTOR` | |
+| JAM ALARM | Lamp, red | `JAM` | Latched fault |
+| Boxes: n / 10 | Text with `%d` | `C1.CV` | Live crate count |
+
+All safety logic stays in the PLC program. The screen only reads and writes variables, so the machine behaves the same whether it is operated from the HMI or from hardware buttons.
+
 ## Tests (simulation, all passed)
 
 Tested with PV = 3 and jam time = 8 s to save time, then set to 10 boxes and 20 s and re-tested.
@@ -93,6 +113,5 @@ Tested with PV = 3 and jam time = 8 s to save time, then set to 10 boxes and 20 
 
 ## Next
 
-- HMI screen (CODESYS Visualization): buttons, lamps, box count, jam alarm
 - OPC UA: read the PLC values from Python and connect them to the vibration anomaly detector in this repo
 - Rebuild in Siemens TIA Portal (S7-1200)
