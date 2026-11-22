@@ -22,3 +22,5 @@ desktop.ini
 
 # OPC UA client certificates and private keys (never commit keys)
 pki/
+
+plc/conveyor_station/*.Device.Application.xml
