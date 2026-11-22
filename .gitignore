@@ -7,3 +7,15 @@ _autosave-*
 #auto_saved_files#
 fp-info-cache
 *.kicad_prl
+
+# CODESYS temporary / machine-specific files
+*.precompilecache
+*.opt
+*.~u
+*.bootinfo
+*.bootinfo_guids
+*.compileinfo
+
+# CODESYS lesson files (not part of the portfolio)
+plc/conveyor_station/lesson1_start_stop*
+desktop.ini

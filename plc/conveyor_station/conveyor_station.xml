@@ -1,0 +1,656 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<project xmlns="http://www.plcopen.org/xml/tc6_0200">
+  <fileHeader companyName="" productName="CODESYS" productVersion="CODESYS V3.5 SP22 Patch 4" creationDateTime="2026-11-22T03:58:05.8299486" />
+  <contentHeader name="conveyor_station.project" modificationDateTime="1601-01-01T03:00:00">
+    <coordinateInfo>
+      <fbd>
+        <scaling x="1" y="1" />
+      </fbd>
+      <ld>
+        <scaling x="1" y="1" />
+      </ld>
+      <sfc>
+        <scaling x="1" y="1" />
+      </sfc>
+    </coordinateInfo>
+    <addData>
+      <data name="http://www.3s-software.com/plcopenxml/projectinformation" handleUnknown="implementation">
+        <ProjectInformation />
+      </data>
+    </addData>
+  </contentHeader>
+  <types>
+    <dataTypes />
+    <pous>
+      <pou name="PLC_PRG" pouType="program">
+        <interface>
+          <localVars>
+            <variable name="START_BTN">
+              <type>
+                <BOOL />
+              </type>
+              <documentation>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml"> physical NO button</xhtml>
+              </documentation>
+            </variable>
+            <variable name="STOP_BTN">
+              <type>
+                <BOOL />
+              </type>
+              <initialValue>
+                <simpleValue value="TRUE" />
+              </initialValue>
+              <documentation>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml"> physical NC button (TRUE = not pressed)</xhtml>
+              </documentation>
+            </variable>
+            <variable name="RUN">
+              <type>
+                <BOOL />
+              </type>
+              <documentation>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml"> memory bit: operator wants the conveyor running</xhtml>
+              </documentation>
+            </variable>
+            <variable name="LAMP">
+              <type>
+                <BOOL />
+              </type>
+              <documentation>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml"> warning lamp</xhtml>
+              </documentation>
+            </variable>
+            <variable name="MOTOR">
+              <type>
+                <BOOL />
+              </type>
+              <documentation>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml"> conveyor motor</xhtml>
+              </documentation>
+            </variable>
+            <variable name="T1">
+              <type>
+                <derived name="TON" />
+              </type>
+              <documentation>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml"> on-delay timer</xhtml>
+              </documentation>
+            </variable>
+            <variable name="SENSOR">
+              <type>
+                <BOOL />
+              </type>
+              <documentation>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml"> photo sensor: TRUE while a box blocks the beam</xhtml>
+              </documentation>
+            </variable>
+            <variable name="RESET_BTN">
+              <type>
+                <BOOL />
+              </type>
+              <documentation>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml"> operator resets the counter after swapping the crate</xhtml>
+              </documentation>
+            </variable>
+            <variable name="C1">
+              <type>
+                <derived name="CTU" />
+              </type>
+              <documentation>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml"> up-counter</xhtml>
+              </documentation>
+            </variable>
+            <variable name="R1">
+              <type>
+                <derived name="R_TRIG" />
+              </type>
+              <documentation>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml"> rising-edge detector for START</xhtml>
+              </documentation>
+            </variable>
+            <variable name="START_EDGE">
+              <type>
+                <BOOL />
+              </type>
+              <documentation>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml"> TRUE for one scan when START is pressed</xhtml>
+              </documentation>
+            </variable>
+            <variable name="T2">
+              <type>
+                <derived name="TON" />
+              </type>
+              <documentation>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml"> jam timer</xhtml>
+              </documentation>
+            </variable>
+            <variable name="JAM">
+              <type>
+                <BOOL />
+              </type>
+              <documentation>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml"> jam alarm (latched)</xhtml>
+              </documentation>
+            </variable>
+            <variable name="ACK_BTN">
+              <type>
+                <BOOL />
+              </type>
+              <documentation>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml"> operator acknowledges the alarm</xhtml>
+              </documentation>
+            </variable>
+          </localVars>
+        </interface>
+        <body>
+          <LD>
+            <!--ObjectVersion: LD1-->
+            <leftPowerRail localId="0">
+              <position x="0" y="0" />
+              <connectionPointOut formalParameter="none" />
+            </leftPowerRail>
+            <comment localId="1" height="0" width="0">
+              <position x="0" y="0" />
+              <content>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml" />
+              </content>
+            </comment>
+            <vendorElement localId="2">
+              <position x="0" y="0" />
+              <alternativeText>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml">Rising edge on START: prevents unexpected restart from a held/stuck button</xhtml>
+              </alternativeText>
+              <addData>
+                <data name="http://www.3s-software.com/plcopenxml/fbdelementtype" handleUnknown="implementation">
+                  <ElementType xmlns="">networktitle</ElementType>
+                </data>
+              </addData>
+            </vendorElement>
+            <contact localId="4" negated="false" storage="none" edge="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="0" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>START_BTN</variable>
+            </contact>
+            <block localId="3" typeName="R_TRIG" instanceName="R1">
+              <position x="0" y="0" />
+              <inputVariables>
+                <variable formalParameter="CLK">
+                  <connectionPointIn>
+                    <connection refLocalId="4" />
+                  </connectionPointIn>
+                </variable>
+              </inputVariables>
+              <inOutVariables />
+              <outputVariables>
+                <variable formalParameter="Q">
+                  <connectionPointOut />
+                </variable>
+              </outputVariables>
+              <addData>
+                <data name="http://www.3s-software.com/plcopenxml/fbdcalltype" handleUnknown="implementation">
+                  <CallType xmlns="">functionblock</CallType>
+                </data>
+                <data name="http://www.3s-software.com/plcopenxml/inputparamtypes" handleUnknown="implementation">
+                  <InputParamTypes xmlns="">BOOL</InputParamTypes>
+                </data>
+                <data name="http://www.3s-software.com/plcopenxml/outputparamtypes" handleUnknown="implementation">
+                  <OutputParamTypes xmlns="" />
+                </data>
+              </addData>
+            </block>
+            <coil localId="5" negated="false" storage="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="3" formalParameter="Q" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>START_EDGE</variable>
+            </coil>
+            <comment localId="6" height="0" width="0">
+              <position x="0" y="0" />
+              <content>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml" />
+              </content>
+            </comment>
+            <vendorElement localId="7">
+              <position x="0" y="0" />
+              <alternativeText>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml">Run latch: stopped by STOP, crate full (C1.Q) or jam (JAM)</xhtml>
+              </alternativeText>
+              <addData>
+                <data name="http://www.3s-software.com/plcopenxml/fbdelementtype" handleUnknown="implementation">
+                  <ElementType xmlns="">networktitle</ElementType>
+                </data>
+              </addData>
+            </vendorElement>
+            <contact localId="8" negated="false" storage="none" edge="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="0" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>START_EDGE</variable>
+            </contact>
+            <contact localId="9" negated="false" storage="none" edge="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="0" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>RUN</variable>
+            </contact>
+            <contact localId="10" negated="false" storage="none" edge="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="8" />
+                <connection refLocalId="9" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>STOP_BTN</variable>
+            </contact>
+            <contact localId="11" negated="true" storage="none" edge="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="10" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>C1.Q</variable>
+            </contact>
+            <contact localId="12" negated="true" storage="none" edge="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="11" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>JAM</variable>
+            </contact>
+            <coil localId="13" negated="false" storage="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="12" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>RUN</variable>
+            </coil>
+            <comment localId="14" height="0" width="0">
+              <position x="0" y="0" />
+              <content>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml" />
+              </content>
+            </comment>
+            <vendorElement localId="15">
+              <position x="0" y="0" />
+              <alternativeText>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml">5 s warning timer before the conveyor moves</xhtml>
+              </alternativeText>
+              <addData>
+                <data name="http://www.3s-software.com/plcopenxml/fbdelementtype" handleUnknown="implementation">
+                  <ElementType xmlns="">networktitle</ElementType>
+                </data>
+              </addData>
+            </vendorElement>
+            <contact localId="17" negated="false" storage="none" edge="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="0" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>RUN</variable>
+            </contact>
+            <inVariable localId="18">
+              <position x="0" y="0" />
+              <connectionPointOut />
+              <expression>T#5S</expression>
+            </inVariable>
+            <block localId="16" typeName="TON" instanceName="T1">
+              <position x="0" y="0" />
+              <inputVariables>
+                <variable formalParameter="IN">
+                  <connectionPointIn>
+                    <connection refLocalId="17" />
+                  </connectionPointIn>
+                </variable>
+                <variable formalParameter="PT">
+                  <connectionPointIn>
+                    <connection refLocalId="18" />
+                  </connectionPointIn>
+                </variable>
+              </inputVariables>
+              <inOutVariables />
+              <outputVariables>
+                <variable formalParameter="Q">
+                  <connectionPointOut />
+                </variable>
+                <variable formalParameter="ET">
+                  <connectionPointOut>
+                    <expression />
+                  </connectionPointOut>
+                </variable>
+              </outputVariables>
+              <addData>
+                <data name="http://www.3s-software.com/plcopenxml/fbdcalltype" handleUnknown="implementation">
+                  <CallType xmlns="">functionblock</CallType>
+                </data>
+                <data name="http://www.3s-software.com/plcopenxml/inputparamtypes" handleUnknown="implementation">
+                  <InputParamTypes xmlns="">BOOL TIME</InputParamTypes>
+                </data>
+                <data name="http://www.3s-software.com/plcopenxml/outputparamtypes" handleUnknown="implementation">
+                  <OutputParamTypes xmlns="" />
+                </data>
+              </addData>
+            </block>
+            <comment localId="19" height="0" width="0">
+              <position x="0" y="0" />
+              <content>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml" />
+              </content>
+            </comment>
+            <vendorElement localId="20">
+              <position x="0" y="0" />
+              <alternativeText>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml">Warning lamp ON during the 5 s countdown</xhtml>
+              </alternativeText>
+              <addData>
+                <data name="http://www.3s-software.com/plcopenxml/fbdelementtype" handleUnknown="implementation">
+                  <ElementType xmlns="">networktitle</ElementType>
+                </data>
+              </addData>
+            </vendorElement>
+            <contact localId="21" negated="false" storage="none" edge="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="0" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>RUN</variable>
+            </contact>
+            <contact localId="22" negated="true" storage="none" edge="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="21" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>T1.Q</variable>
+            </contact>
+            <coil localId="23" negated="false" storage="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="22" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>LAMP</variable>
+            </coil>
+            <comment localId="24" height="0" width="0">
+              <position x="0" y="0" />
+              <content>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml" />
+              </content>
+            </comment>
+            <vendorElement localId="25">
+              <position x="0" y="0" />
+              <alternativeText>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml">Conveyor motor ON after the warning</xhtml>
+              </alternativeText>
+              <addData>
+                <data name="http://www.3s-software.com/plcopenxml/fbdelementtype" handleUnknown="implementation">
+                  <ElementType xmlns="">networktitle</ElementType>
+                </data>
+              </addData>
+            </vendorElement>
+            <contact localId="26" negated="false" storage="none" edge="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="0" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>T1.Q</variable>
+            </contact>
+            <coil localId="27" negated="false" storage="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="26" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>MOTOR</variable>
+            </coil>
+            <comment localId="28" height="0" width="0">
+              <position x="0" y="0" />
+              <content>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml" />
+              </content>
+            </comment>
+            <vendorElement localId="29">
+              <position x="0" y="0" />
+              <alternativeText>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml">Box counter: crate full at 10; RESET only allowed while stopped</xhtml>
+              </alternativeText>
+              <addData>
+                <data name="http://www.3s-software.com/plcopenxml/fbdelementtype" handleUnknown="implementation">
+                  <ElementType xmlns="">networktitle</ElementType>
+                </data>
+              </addData>
+            </vendorElement>
+            <contact localId="31" negated="false" storage="none" edge="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="0" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>SENSOR</variable>
+            </contact>
+            <contact localId="32" negated="false" storage="none" edge="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="0" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>RESET_BTN</variable>
+            </contact>
+            <contact localId="33" negated="true" storage="none" edge="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="32" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>RUN</variable>
+            </contact>
+            <inVariable localId="34">
+              <position x="0" y="0" />
+              <connectionPointOut />
+              <expression>10</expression>
+            </inVariable>
+            <block localId="30" typeName="CTU" instanceName="C1">
+              <position x="0" y="0" />
+              <inputVariables>
+                <variable formalParameter="CU">
+                  <connectionPointIn>
+                    <connection refLocalId="31" />
+                  </connectionPointIn>
+                </variable>
+                <variable formalParameter="RESET">
+                  <connectionPointIn>
+                    <connection refLocalId="33" />
+                  </connectionPointIn>
+                </variable>
+                <variable formalParameter="PV">
+                  <connectionPointIn>
+                    <connection refLocalId="34" />
+                  </connectionPointIn>
+                </variable>
+              </inputVariables>
+              <inOutVariables />
+              <outputVariables>
+                <variable formalParameter="Q">
+                  <connectionPointOut />
+                </variable>
+                <variable formalParameter="CV">
+                  <connectionPointOut>
+                    <expression />
+                  </connectionPointOut>
+                </variable>
+              </outputVariables>
+              <addData>
+                <data name="http://www.3s-software.com/plcopenxml/fbdcalltype" handleUnknown="implementation">
+                  <CallType xmlns="">functionblock</CallType>
+                </data>
+                <data name="http://www.3s-software.com/plcopenxml/inputparamtypes" handleUnknown="implementation">
+                  <InputParamTypes xmlns="">BOOL BOOL WORD</InputParamTypes>
+                </data>
+                <data name="http://www.3s-software.com/plcopenxml/outputparamtypes" handleUnknown="implementation">
+                  <OutputParamTypes xmlns="" />
+                </data>
+              </addData>
+            </block>
+            <comment localId="35" height="0" width="0">
+              <position x="0" y="0" />
+              <content>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml" />
+              </content>
+            </comment>
+            <vendorElement localId="36">
+              <position x="0" y="0" />
+              <alternativeText>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml">Jam timer: motor running and no box at the sensor for 20 s</xhtml>
+              </alternativeText>
+              <addData>
+                <data name="http://www.3s-software.com/plcopenxml/fbdelementtype" handleUnknown="implementation">
+                  <ElementType xmlns="">networktitle</ElementType>
+                </data>
+              </addData>
+            </vendorElement>
+            <contact localId="38" negated="false" storage="none" edge="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="0" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>MOTOR</variable>
+            </contact>
+            <contact localId="39" negated="true" storage="none" edge="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="38" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>SENSOR</variable>
+            </contact>
+            <inVariable localId="40">
+              <position x="0" y="0" />
+              <connectionPointOut />
+              <expression>T#20S</expression>
+            </inVariable>
+            <block localId="37" typeName="TON" instanceName="T2">
+              <position x="0" y="0" />
+              <inputVariables>
+                <variable formalParameter="IN">
+                  <connectionPointIn>
+                    <connection refLocalId="39" />
+                  </connectionPointIn>
+                </variable>
+                <variable formalParameter="PT">
+                  <connectionPointIn>
+                    <connection refLocalId="40" />
+                  </connectionPointIn>
+                </variable>
+              </inputVariables>
+              <inOutVariables />
+              <outputVariables>
+                <variable formalParameter="Q">
+                  <connectionPointOut />
+                </variable>
+                <variable formalParameter="ET">
+                  <connectionPointOut>
+                    <expression />
+                  </connectionPointOut>
+                </variable>
+              </outputVariables>
+              <addData>
+                <data name="http://www.3s-software.com/plcopenxml/fbdcalltype" handleUnknown="implementation">
+                  <CallType xmlns="">functionblock</CallType>
+                </data>
+                <data name="http://www.3s-software.com/plcopenxml/inputparamtypes" handleUnknown="implementation">
+                  <InputParamTypes xmlns="">BOOL TIME</InputParamTypes>
+                </data>
+                <data name="http://www.3s-software.com/plcopenxml/outputparamtypes" handleUnknown="implementation">
+                  <OutputParamTypes xmlns="" />
+                </data>
+              </addData>
+            </block>
+            <comment localId="41" height="0" width="0">
+              <position x="0" y="0" />
+              <content>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml" />
+              </content>
+            </comment>
+            <vendorElement localId="42">
+              <position x="0" y="0" />
+              <alternativeText>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml">Jam alarm latch: cleared only by ACK</xhtml>
+              </alternativeText>
+              <addData>
+                <data name="http://www.3s-software.com/plcopenxml/fbdelementtype" handleUnknown="implementation">
+                  <ElementType xmlns="">networktitle</ElementType>
+                </data>
+              </addData>
+            </vendorElement>
+            <contact localId="43" negated="false" storage="none" edge="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="0" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>T2.Q</variable>
+            </contact>
+            <contact localId="44" negated="false" storage="none" edge="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="0" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>JAM</variable>
+            </contact>
+            <contact localId="45" negated="true" storage="none" edge="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="43" />
+                <connection refLocalId="44" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>ACK_BTN</variable>
+            </contact>
+            <coil localId="46" negated="false" storage="none">
+              <position x="0" y="0" />
+              <connectionPointIn>
+                <connection refLocalId="45" />
+              </connectionPointIn>
+              <connectionPointOut />
+              <variable>JAM</variable>
+            </coil>
+            <rightPowerRail localId="2147483646">
+              <position x="0" y="0" />
+              <connectionPointIn />
+            </rightPowerRail>
+          </LD>
+        </body>
+        <addData>
+          <data name="http://www.3s-software.com/plcopenxml/objectid" handleUnknown="discard">
+            <ObjectId>bd672503-0a98-4cc2-a0f1-cf1b799d2677</ObjectId>
+          </data>
+        </addData>
+      </pou>
+    </pous>
+  </types>
+  <instances>
+    <configurations />
+  </instances>
+  <addData>
+    <data name="http://www.3s-software.com/plcopenxml/projectstructure" handleUnknown="discard">
+      <ProjectStructure>
+        <Object Name="PLC_PRG" ObjectId="bd672503-0a98-4cc2-a0f1-cf1b799d2677" />
+      </ProjectStructure>
+    </data>
+  </addData>
+</project>
