@@ -116,12 +116,6 @@ A single flagged window is not an alarm. An alarm is raised when at least 3 of t
 
 The rule removed all false alarms in the healthy test stream (about 250 s) and sped up confirmation of strong faults, but it makes weak faults (per-window rate below about 60%) harder to detect. Single run on simulated data.
 
-### Next steps
-- Test zero-padded FFT and longer windows for frequency sensitivity ✅
-- Add a "3 of the last 5 windows" alarm rule ✅
-- Validate on a public bearing vibration dataset (e.g., CWRU)
-- Replace simulated data with real MPU6050 readings
-- Design the sensor board schematic in KiCad ✅
 
 ### Run it
 ```
@@ -129,3 +123,22 @@ pip install numpy pandas scikit-learn
 python sensor_data.py
 python detect.py
 ```
+## Roadmap
+
+**Done**
+- [x] DSP exercises: FFT windows, aliasing, FIR filters, spectrogram (`dsp/`)
+- [x] Control exercises: P, PI, PID with disturbance and sensor noise (`control/`)
+- [x] Unsupervised anomaly detection on simulated vibration: One-Class SVM, Hann + zero-padded FFT, 3-of-5 alarm rule
+- [x] Sensor board schematic in KiCad (MPU6050 + Arduino Nano, ERC clean)
+- [x] PLC conveyor station in ladder logic with HMI, interlocks and jam alarm (`plc/conveyor_station/`)
+- [x] Encrypted OPC UA client: Python reads the running PLC, logs to CSV and plots a machine cycle (`plc/opcua/`)
+
+**In progress**
+- [ ] Supervised fault classification with scikit-learn: features, cross-validation, model comparison (`ml/`)
+
+**Planned**
+- [ ] Validate on a public bearing-fault dataset (CWRU) instead of simulated data
+- [ ] ML meets the PLC: live OPC UA data → model → fault alarm written back to the PLC/HMI
+- [ ] 1D CNN on raw vibration signals (PyTorch), compared with the feature-based models
+- [ ] TinyML: run the fault detector on a microcontroller (ESP32 + MPU6050)
+- [ ] Siemens TIA Portal version of the conveyor station
