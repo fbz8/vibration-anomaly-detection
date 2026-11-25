@@ -1,131 +1,35 @@
-# Industrial Automation & Predictive Maintenance Portfolio
+# Control Exercises (MATLAB / Simulink)
 
-Learning-by-building repository: signal processing, control, PLC programming and machine learning, all aimed at one goal, **detecting machine faults early and acting on them in an industrial control system.**
+Step-response and feedback-control exercises from the control part of my learning plan. All systems are simulated.
 
-```
- sensor ──► DSP features ──► ML fault detection ──► PLC / HMI alarm
- (dsp/)      (detect_v2.py)    (ml/, detect.py)       (plc/)
-                     control loops: control/
-```
-
-## Repository structure
-
-| Folder | What it contains | Tools |
+| File | Topic | What I found |
 |---|---|---|
-| [root](#vibration-anomaly-detection-simulated-sensor-data) | Vibration anomaly detection: FFT features, One-Class SVM, 3-of-5 alarm rule | Python, scikit-learn |
-| [`dsp/`](dsp/README.md) | 6 signal-processing exercises: FFT windows, aliasing, FIR filters, spectrogram | MATLAB |
-| [`control/`](control/README.md) | 6 control exercises: first/second-order systems, P, PI, PID with disturbance and sensor noise | MATLAB, Simulink |
-| [`plc/conveyor_station/`](plc/conveyor_station/README.md) | Conveyor station in ladder logic: start warning, box counter, jam alarm, HMI | CODESYS (IEC 61131-3) |
-| [`plc/opcua/`](plc/opcua/README.md) | Encrypted OPC UA client that reads the running PLC, logs to CSV and plots a machine cycle | Python (asyncua), OPC UA |
-| `ml/` | Supervised fault classification (in progress) | Python, scikit-learn |
-| [`hardware/`](hardware/mpu6050_board/) | MPU6050 + Arduino Nano sensor board (designed, not built yet) | KiCad |
+| `ex7_first_order_step.m`, `first_order.slx` | Step response of a first-order system, tau = 0.5, 1, 2 | Measured 10-90% rise time = 1.10, 2.20 and 4.39 s (2.2 tau). 2% settling time = 1.96, 3.91 and 7.83 s, i.e. tau*ln(50) = 3.91 tau, which the usual "4 tau" rule rounds. The output reaches 63.2% of its final value at t = tau. It is the same math as exponential smoothing in `dsp/ex6` (a = e^(-T/tau)). |
+| `ex8_second_order.m`, `second_order.slx` | Step response of a second-order system, wn = 2 rad/s, zeta = 0.2, 0.7, 1 | Measured overshoot 52.6% / 4.6% / 0% against the formula's 52.7% / 4.6% / 0%. Poles are -0.4 +/- 1.96j, -1.4 +/- 1.43j and -2 (double). The real part sets how fast the oscillation decays, the imaginary part sets its frequency. zeta of about 0.7 is a good compromise between speed and overshoot. |
+| `ex9_p_control.m` | P control of a first-order plant, Kp = 1, 4, 10 | Steady-state error is 1/(1+Kp): 0.500, 0.200 and 0.091. Settling time shrinks as 1/(1+Kp): 1.96, 0.79 and 0.36 s. P alone cannot reach zero error at a reasonable gain, and a very high Kp would amplify noise and hit actuator limits. |
+| `ex10_pi_control.m` | PI control, Kp = 4, Ki = 1, 4, 25 | The integrator removes the steady-state error (final value 1.000). Overshoot is 0.0 / 0.1 / 24.5%. The closed loop has a zero at -Ki/Kp, so the ex8 formula underestimates the overshoot (16.3% predicted for Ki = 25). At Ki = 4 the zero cancels a pole and the response is first order (settling 0.98 s). |
+| `ex11_pid_disturbance.m` | P, PI and PID on a second-order plant (wn = 2, zeta = 0.2), input disturbance d0 = 0.5 at t = 15 s | P settles at 0.665 and moves to 0.833 after the disturbance, matching Kp/(1+Kp) = 0.667 and (Kp+d0)/(1+Kp) = 0.833. PI and PID return to 1.000: the integrator rejects the disturbance. Step overshoot (before t = 15 s, relative to each controller's own final value): P 69.8%, PI 33.8%, PID 0.0%. PI is still oscillating at t = 15 s, so its "settled" value (0.978) is biased low and its true overshoot is about 31%. D acts on the measurement, which avoids derivative kick and damps the response. |
+| `ex12_noisy_sensor.m` | ex11 PID with sensor noise (std 0.02), derivative filter Tf = 0.01 vs 0.1 | Actuator noise std(u) = 1.983 vs 0.240: an 8.3x reduction, matching the high-frequency gain ratio (Kp + Kd/Tf) = 102/12 = 8.5. Output noise std(y) is almost unchanged (0.0153 vs 0.0155): the controller trusts the sensor, so low-frequency noise passes to the output, and no controller filter can remove it. Cost of the stronger filter: overshoot 0.0% to 4.0% (slower D gives less damping). Predicted all three results before running. |
 
----
+## Figures
 
-## Vibration Anomaly Detection (Simulated Sensor Data)
+**ex7 – First-order step response**
+![First-order step response](first_order_step.png)
 
-A small predictive-maintenance prototype: simulate accelerometer-style vibration data, extract signal features, and train a model on **healthy data only** to flag abnormal vibration.
+**ex8 – Second-order step response**
+![Second-order step response](second_order_step.png)
 
-> **Important:** all data in this project is **simulated** (sine wave + Gaussian noise). No physical sensor data was used yet. Planned hardware: MPU6050 + Arduino Nano, with the circuit designed in KiCad.
+**ex9 – P control**
+![P control](p_control_step.png)
 
-### Pipeline
+**ex10 – PI control**
+![PI control](pi_control_step.png)
 
-1. `sensor_data.py` creates `normal.csv` and `abnormal.csv` (100 Hz sampling, 50,000 rows each).
-   - Normal: 5 Hz sine, amplitude 1.0, noise sigma 0.3
-   - Abnormal: 12 Hz sine, amplitude 3.0, noise sigma 0.8
-2. `detect.py` cuts the signal into 1-second windows (50% overlap) and extracts 4 features per window: RMS, variance, peak, dominant frequency (FFT).
-3. A One-Class SVM is trained on the first half of the normal windows only, then tested on unseen normal windows and on abnormal windows.
+**ex11 – P, PI and PID with a disturbance at t = 15 s**
+![PID with disturbance](pid_disturbance.png)
 
-### Results
+**ex12 – Sensor noise: weak (Tf = 0.01) vs strong (Tf = 0.1) derivative filter**
+![PID with sensor noise](ex12_noisy_sensor.png)
 
-| Setting | False alarms (normal flagged) | Detection (abnormal flagged) |
-|---|---|---|
-| Isolation Forest, 2,000 rows | 0% | **0%** |
-| One-Class SVM (scaled), 10,000 rows, gamma="scale" | ~17% | 100% |
-| One-Class SVM, gamma=0.03, nu=0.02, 10,000 rows | ~8% | 100% |
-| One-Class SVM, gamma=0.03, nu=0.02, 50,000 rows | ~2-4% | 100% |
-
-#### What I learned
-- **Isolation Forest failed completely (0% detection).** My best explanation: the abnormal windows lie far outside the range of the training data on every feature, so random cuts do not separate them from the extreme training points. Isolation Forest is better at finding outliers inside the data cloud than far outside it.
-- **A scaled One-Class SVM fixed detection.** It measures distance from the learned "normal" region.
-- **Lowering `gamma` and adding data reduced false alarms** from about 17% to about 2-4%. More data helped more than parameter tuning.
-
-#### Detection limit (subtler faults)
-
-Amplitude change only (frequency fixed at 5 Hz):
-
-| Amplitude vs. normal | Detected |
-|---|---|
-| +5% | 6% |
-| +10% | 31% |
-| +15% | 76% |
-| +20% | 96% |
-| +30% | 100% |
-
-Frequency change only (amplitude fixed at 1.0):
-
-| Frequency | Detected |
-|---|---|
-| 5.1 Hz | 2% |
-| 5.2 Hz | 1% |
-| 5.5 Hz | 2% |
-| 6 Hz | 3% |
-| 7 Hz | 32% |
-
-With a false alarm rate of about 2%, detection of 1-3% is indistinguishable from noise.
-
-### Limitations
-- The model reliably detects amplitude increases of roughly 20% or more, but v1 **barely detects frequency shifts** below about 2 Hz (improved in v2, see below).
-- Results are on simulated data with one fault type. Real machine vibration is messier.
-- Detection is per window. A real system would likely require several consecutive anomalous windows before raising an alarm.
-
-### Hardware (planned)
-
-Sensor board designed in KiCad: Arduino Nano + MPU6050 (GY-521) over I2C (A4 = SDA, A5 = SCL, AD0 tied to GND). The schematic passes KiCad's ERC with 0 errors. The board has not been built yet, so all results above are still from simulated data.
-
-![Schematic](hardware/mpu6050_board/schematic.png)
-
-### v2: Hann window + zero-padded FFT
-
-The README's earlier hypothesis was that 1 Hz FFT resolution limited frequency sensitivity. I tested it by applying a Hann window and zero-padding each window to 1024 points (`detect_v2.py`).
-
-| Frequency | v1 | v2 |
-|---|---|---|
-| 5.1 Hz | 2% | 25% |
-| 5.2 Hz | 1% | 97% |
-| 5.5 Hz | 2% | 100% |
-| 6 Hz | 3% | 100% |
-| 7 Hz | 32% | 100% |
-
-False alarms stayed at about 3% and amplitude detection was unchanged. Frequency shifts of 0.2 Hz are now caught on simulated data. Single run, one noise level, simulated data only.
-
-### Alarm rule: 3 of the last 5 windows
-
-A single flagged window is not an alarm. An alarm is raised when at least 3 of the last 5 windows are flagged (windows are 1 s long with 0.5 s step, so the earliest possible alarm is at 2.0 s).
-
-| Case | Per-window | 3-of-5 | First alarm |
-|---|---|---|---|
-| Healthy (false alarms) | 3% | 0% | none |
-| Amplitude +30% | 100% | 100% | 2.0 s |
-| Amplitude +20% | 94% | 99% | 2.0 s |
-| Amplitude +15% | 70% | 78% | 2.5 s |
-| Amplitude +10% | 32% | 22% | 10.0 s |
-| Amplitude +5% | 5% | 1% | not detected |
-| Frequency 5.2 Hz | 98% | 100% | 2.0 s |
-| Frequency 5.1 Hz | 26% | 9% | 4.5 s |
-
-The rule removed all false alarms in the healthy test stream (about 250 s) and sped up confirmation of strong faults, but it makes weak faults (per-window rate below about 60%) harder to detect. Single run on simulated data.
-
-### Next steps
-- Test zero-padded FFT and longer windows for frequency sensitivity ✅
-- Add a "3 of the last 5 windows" alarm rule ✅
-- Validate on a public bearing vibration dataset (e.g., CWRU)
-- Replace simulated data with real MPU6050 readings
-- Design the sensor board schematic in KiCad ✅
-
-### Run it
-```
-pip install numpy pandas scikit-learn
-python sensor_data.py
-python detect.py
-```
+## Next
+- Phase 3: PLC programming in Siemens TIA Portal (PID_Compact uses the same derivative filter idea)
